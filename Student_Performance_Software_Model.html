@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance & Study Factors Dashboard — Software Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --green: #22c55e;
+            --orange: #f59e0b;
+            --pink: #ec4899;
+            --purple: #a855f7;
+            --cyan: #06b6d4;
+            --red: #ef4444;
+            --sidebar-w: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            overflow-y: auto;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo {
+            padding: 0 24px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-logo span {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .nav-section {
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 12px 8px 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .nav-link .icon {
+            font-size: 16px;
+            width: 22px;
+            text-align: center;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 60px 60px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1040 100%);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--text-muted);
+            max-width: 650px;
+            line-height: 1.8;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            margin-top: 36px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .num {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .hero-stat .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sections */
+        .section {
+            padding: 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .section-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 36px;
+            max-width: 700px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Diagram container */
+        .diagram-box {
+            background: #0d1525;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        .diagram-box .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Tables */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .styled-table thead {
+            background: var(--surface2);
+        }
+
+        .styled-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .styled-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+            color: var(--text);
+        }
+
+        .styled-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-high { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .badge-med { background: rgba(245, 158, 11, 0.15); color: var(--orange); }
+        .badge-low { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Metric cards */
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .metric-card .metric-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .metric-card .metric-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .metric-card .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* Tech stack */
+        .tech-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 4px;
+        }
+
+        /* Scope tags */
+        .scope-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .scope-box {
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .scope-in {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .scope-out {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .scope-box h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .scope-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .scope-box li {
+            padding: 4px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .scope-box li::before {
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .scope-in li::before { content: '✅'; }
+        .scope-out li::before { content: '❌'; }
+
+        /* Tab system for sequence diagrams */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface2);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 30px 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .hero { padding: 40px 24px; }
+            .section { padding: 40px 24px; }
+            .hero h1 { font-size: 28px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media print {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .hero { page-break-after: always; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <h2>📊 Software Model</h2>
+        <span>DBMS Project</span>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="#hero" class="nav-link active"><span class="icon">🏠</span> Introduction</a>
+        <a href="#requirements" class="nav-link"><span class="icon">📋</span> Requirements</a>
+        <a href="#scope" class="nav-link"><span class="icon">🎯</span> Scope & Stack</a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title">UML Diagrams</div>
+        <a href="#usecase" class="nav-link"><span class="icon">👤</span> Use Case Diagram</a>
+        <a href="#class" class="nav-link"><span class="icon">🏗️</span> Class Diagram</a>
+        <a href="#sequence" class="nav-link"><span class="icon">🔄</span> Sequence Diagrams</a>
+        <a href="#activity" class="nav-link"><span class="icon">🔀</span> Activity Diagrams</a>
+        <a href="#state" class="nav-link"><span class="icon">🔁</span> State Diagrams</a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title">Data Modeling</div>
+        <a href="#dfd" class="nav-link"><span class="icon">🌊</span> DFD (Level 0, 1, 2)</a>
+        <a href="#er" class="nav-link"><span class="icon">🗃️</span> ER Diagram</a>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title">Architecture</div>
+        <a href="#component" class="nav-link"><span class="icon">🧩</span> Component Diagram</a>
+        <a href="#deployment" class="nav-link"><span class="icon">☁️</span> Deployment Diagram</a>
+    </div>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">📐 DBMS Project — Software Model</div>
+        <h1>Student Performance &<br>Study Factors Dashboard</h1>
+        <p>A comprehensive relational database-backed dashboard that tracks, analyzes, and visualizes the relationship between student study habits, lifestyle factors, and academic performance.</p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="num">13</div>
+                <div class="label">Entities</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">9</div>
+                <div class="label">UML Models</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">15</div>
+                <div class="label">Use Cases</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">3</div>
+                <div class="label">Actors</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- REQUIREMENTS -->
+    <section class="section" id="requirements">
+        <div class="section-header">
+            <div class="section-num">1</div>
+            <h2>Requirements Analysis</h2>
+        </div>
+        <p class="section-desc">Functional and non-functional requirements that drive the system design.</p>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>⚙️ Functional Requirements</h3>
+                <p class="subtitle">What the system must do</p>
+                <table class="styled-table">
+                    <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+                    <tbody>
+                        <tr><td>FR-01</td><td>Register & manage student profiles</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-02</td><td>Create & manage courses, subjects, semesters</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-03</td><td>Record exam scores (internal, mid, final)</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-04</td><td>Log daily/weekly study hours per subject</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-05</td><td>Track attendance (present/absent/late)</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-06</td><td>Record lifestyle factors (sleep, stress, job)</td><td><span class="badge badge-med">Medium</span></td></tr>
+                        <tr><td>FR-07</td><td>Log extracurricular participation</td><td><span class="badge badge-med">Medium</span></td></tr>
+                        <tr><td>FR-08</td><td>Generate per-student performance reports</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-09</td><td>Dashboard: top performers, at-risk, correlations</td><td><span class="badge badge-high">High</span></td></tr>
+                        <tr><td>FR-10</td><td>Role-based access (Admin, Faculty, Student)</td><td><span class="badge badge-med">Medium</span></td></tr>
+                        <tr><td>FR-11</td><td>Export reports as CSV</td><td><span class="badge badge-low">Low</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>🛡️ Non-Functional Requirements</h3>
+                <p class="subtitle">Quality attributes the system must meet</p>
+                <table class="styled-table">
+                    <thead><tr><th>ID</th><th>Requirement</th></tr></thead>
+                    <tbody>
+                        <tr><td>NFR-01</td><td>Dashboard query response ≤ 2 seconds</td></tr>
+                        <tr><td>NFR-02</td><td>Support 50+ concurrent users</td></tr>
+                        <tr><td>NFR-03</td><td>Passwords stored as salted bcrypt hashes</td></tr>
+                        <tr><td>NFR-04</td><td>Data retained for 5 academic years minimum</td></tr>
+                        <tr><td>NFR-05</td><td>99.5% uptime during academic sessions</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">👥 Actors</h3>
+                <p class="subtitle">Who interacts with the system</p>
+                <div class="grid-3" style="margin-top: 12px;">
+                    <div class="metric-card">
+                        <div class="metric-icon">🧑‍💼</div>
+                        <div style="font-weight:600;">Admin</div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Manages users, departments, courses, generates reports</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">👩‍🏫</div>
+                        <div style="font-weight:600;">Faculty</div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Records scores, marks attendance, views analytics</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🎓</div>
+                        <div style="font-weight:600;">Student</div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Logs study hours, lifestyle data, views own dashboard</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCOPE & STACK -->
+    <section class="section" id="scope">
+        <div class="section-header">
+            <div class="section-num">2</div>
+            <h2>Scope & Technology Stack</h2>
+        </div>
+        <p class="section-desc">What's included, what's not, and the technologies used.</p>
+
+        <div class="scope-grid">
+            <div class="scope-box scope-in">
+                <h4>✅ In Scope</h4>
+                <ul>
+                    <li>Student profile management</li>
+                    <li>Course & exam record storage</li>
+                    <li>Study habits tracking</li>
+                    <li>Attendance management</li>
+                    <li>Lifestyle factor logging</li>
+                    <li>Performance analytics & reports</li>
+                </ul>
+            </div>
+            <div class="scope-box scope-out">
+                <h4>❌ Out of Scope</h4>
+                <ul>
+                    <li>Real-time proctoring</li>
+                    <li>LMS integration</li>
+                    <li>Payment / fee management</li>
+                    <li>Alumni tracking</li>
+                    <li>Mobile app frontend</li>
+                    <li>AI-based predictions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <h3>🛠️ Technology Stack</h3>
+            <p class="subtitle">Recommended tools and frameworks</p>
+            <div style="margin-top: 12px;">
+                <span class="tech-tag">🌐 React.js</span>
+                <span class="tech-tag">📊 Chart.js</span>
+                <span class="tech-tag">🎨 Tailwind CSS</span>
+                <span class="tech-tag">⚙️ Node.js (Express)</span>
+                <span class="tech-tag">🐍 Python (Flask)</span>
+                <span class="tech-tag">🗄️ MySQL 8.0</span>
+                <span class="tech-tag">🐘 PostgreSQL 15</span>
+                <span class="tech-tag">🔑 JWT Authentication</span>
+                <span class="tech-tag">🔒 bcrypt Hashing</span>
+                <span class="tech-tag">☁️ AWS RDS</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- USE CASE DIAGRAM -->
+    <section class="section" id="usecase">
+        <div class="section-header">
+            <div class="section-num">3</div>
+            <h2>Use Case Diagram</h2>
+        </div>
+        <p class="section-desc">Shows who uses the system and what actions they can perform. Three actors interact with 15 use cases.</p>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+flowchart LR
+    subgraph Actors
+        A["🧑‍💼 Admin"]
+        F["👩‍🏫 Faculty"]
+        S["🎓 Student"]
+    end
+
+    subgraph System["📊 Student Performance Dashboard"]
+        UC1["UC1: Login / Logout"]
+        UC2["UC2: Manage Students"]
+        UC3["UC3: Manage Courses"]
+        UC4["UC4: Manage Departments"]
+        UC5["UC5: Record Exam Scores"]
+        UC6["UC6: Mark Attendance"]
+        UC7["UC7: Log Study Hours"]
+        UC8["UC8: Log Lifestyle Factors"]
+        UC9["UC9: Log Extracurriculars"]
+        UC10["UC10: View Dashboard"]
+        UC11["UC11: Generate Reports"]
+        UC12["UC12: Identify At-Risk Students"]
+        UC13["UC13: View Attendance Report"]
+        UC14["UC14: Export Data CSV"]
+        UC15["UC15: Manage User Accounts"]
+    end
+
+    A --> UC1
+    A --> UC2
+    A --> UC3
+    A --> UC4
+    A --> UC11
+    A --> UC12
+    A --> UC14
+    A --> UC15
+
+    F --> UC1
+    F --> UC5
+    F --> UC6
+    F --> UC10
+    F --> UC12
+    F --> UC13
+
+    S --> UC1
+    S --> UC7
+    S --> UC8
+    S --> UC9
+    S --> UC10
+    S --> UC13
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <h3>📝 Use Case Descriptions</h3>
+            <table class="styled-table">
+                <thead><tr><th>ID</th><th>Use Case</th><th>Actor(s)</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>UC1</td><td>Login / Logout</td><td>All</td><td>Authenticate with username & password; role-based access</td></tr>
+                    <tr><td>UC2</td><td>Manage Students</td><td>Admin</td><td>Add, update, delete, search student records</td></tr>
+                    <tr><td>UC3</td><td>Manage Courses</td><td>Admin</td><td>Create/modify courses, assign faculty</td></tr>
+                    <tr><td>UC5</td><td>Record Exam Scores</td><td>Faculty</td><td>Enter marks per student per exam; auto-grade</td></tr>
+                    <tr><td>UC6</td><td>Mark Attendance</td><td>Faculty</td><td>Mark present/absent/late per session</td></tr>
+                    <tr><td>UC7</td><td>Log Study Hours</td><td>Student</td><td>Record daily hours per subject with method</td></tr>
+                    <tr><td>UC8</td><td>Log Lifestyle Factors</td><td>Student</td><td>Record sleep, stress, job, activity data</td></tr>
+                    <tr><td>UC10</td><td>View Dashboard</td><td>Faculty, Student</td><td>Charts: score trends, study-vs-marks, sleep impact</td></tr>
+                    <tr><td>UC12</td><td>Identify At-Risk</td><td>Admin, Faculty</td><td>Attendance &lt; 75% or avg marks &lt; 40%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- CLASS DIAGRAM -->
+    <section class="section" id="class">
+        <div class="section-header">
+            <div class="section-num">4</div>
+            <h2>Class Diagram</h2>
+        </div>
+        <p class="section-desc">Shows the structural design — classes with attributes, methods, and their relationships.</p>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+classDiagram
+    class Student {
+        -int studentId
+        -String firstName
+        -String lastName
+        -Date dateOfBirth
+        -String gender
+        -String email
+        -String parentEducation
+        -String familyIncomeBracket
+        +getFullName() String
+        +getAge() int
+        +isAtRisk() boolean
+    }
+
+    class Department {
+        -int deptId
+        -String deptName
+        -String hodName
+        +getStudentCount() int
+        +getCourses() List
+    }
+
+    class Faculty {
+        -int facultyId
+        -String firstName
+        -String lastName
+        -String email
+        -String designation
+        +enterMarks() void
+        +markAttendance() void
+    }
+
+    class Course {
+        -int courseId
+        -String courseCode
+        -String courseName
+        -int credits
+        -String courseType
+        +getEnrolledStudents() List
+        +getAverageScore() double
+    }
+
+    class Enrollment {
+        -int enrollmentId
+        -Date enrolledOn
+        -String status
+        +drop() void
+        +complete() void
+    }
+
+    class Attendance {
+        -int attendanceId
+        -String status
+        +markPresent() void
+        +markAbsent() void
+    }
+
+    class ExamScore {
+        -int scoreId
+        -double marksObtained
+        -String grade
+        +calculateGrade() String
+        +getPercentage() double
+    }
+
+    class StudyLog {
+        -int logId
+        -Date logDate
+        -double hoursStudied
+        -String studyMethod
+        +getTotalHours() double
+    }
+
+    class LifestyleFactor {
+        -int factorId
+        -double sleepHours
+        -boolean hasPartTimeJob
+        -String stressLevel
+        -String motivationLevel
+        +getSleepCategory() String
+    }
+
+    class Extracurricular {
+        -int activityId
+        -String activityName
+        -String activityType
+        -double weeklyHours
+        +isActive() boolean
+    }
+
+    class UserAccount {
+        -int userId
+        -String username
+        -String passwordHash
+        -String role
+        +authenticate() boolean
+        +deactivate() void
+    }
+
+    Student "1" --> "1" Department : belongs to
+    Student "1" --> "0..1" UserAccount : has
+    Student "1" --> "*" Enrollment : enrolls
+    Student "1" --> "*" Attendance : has
+    Student "1" --> "*" ExamScore : achieves
+    Student "1" --> "*" StudyLog : logs
+    Student "1" --> "*" LifestyleFactor : records
+    Student "1" --> "*" Extracurricular : participates
+
+    Faculty "1" --> "1" Department : works in
+    Faculty "1" --> "*" Course : teaches
+
+    Course "1" --> "1" Department : offered by
+    Course "1" --> "*" Enrollment : includes
+            </div>
+        </div>
+    </section>
+
+    <!-- SEQUENCE DIAGRAMS -->
+    <section class="section" id="sequence">
+        <div class="section-header">
+            <div class="section-num">5</div>
+            <h2>Sequence Diagrams</h2>
+        </div>
+        <p class="section-desc">Shows the step-by-step message flow between objects for key operations.</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'seq-login')">🔐 Login</button>
+            <button class="tab-btn" onclick="switchTab(event, 'seq-score')">📝 Record Score</button>
+            <button class="tab-btn" onclick="switchTab(event, 'seq-dashboard')">📊 View Dashboard</button>
+            <button class="tab-btn" onclick="switchTab(event, 'seq-study')">📖 Log Study Hours</button>
+            <button class="tab-btn" onclick="switchTab(event, 'seq-atrisk')">⚠️ At-Risk Detection</button>
+        </div>
+
+        <div id="seq-login" class="tab-content active">
+            <div class="diagram-box">
+                <div class="mermaid">
+sequenceDiagram
+    actor U as User
+    participant UI as Login Page
+    participant API as API Server
+    participant Auth as Auth Module
+    participant DB as Database
+
+    U->>UI: Enter username & password
+    UI->>API: POST /api/login
+    API->>Auth: authenticate(username, password)
+    Auth->>DB: SELECT FROM User_Account
+    DB-->>Auth: User record with hash
+    Auth->>Auth: Compare bcrypt hash
+    alt Valid Credentials
+        Auth-->>API: Success + role
+        API->>DB: UPDATE last_login
+        API-->>UI: 200 OK + JWT Token
+        UI-->>U: Redirect to Dashboard
+    else Invalid Credentials
+        Auth-->>API: Failure
+        API-->>UI: 401 Unauthorized
+        UI-->>U: Show error message
+    end
+                </div>
+            </div>
+        </div>
+
+        <div id="seq-score" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+sequenceDiagram
+    actor F as Faculty
+    participant UI as Score Entry Page
+    participant API as API Server
+    participant Logic as Business Logic
+    participant DB as Database
+
+    F->>UI: Select course, exam, enter marks
+    UI->>API: POST /api/scores
+    API->>Logic: validateAndSaveScore()
+    Logic->>DB: SELECT max_marks FROM Exam
+    DB-->>Logic: max_marks = 100
+    Logic->>Logic: Validate marks within range
+    Logic->>Logic: Calculate grade
+    Logic->>DB: INSERT INTO Exam_Score
+    DB-->>Logic: Success
+    Note over Logic,DB: Auto-grade trigger fires
+    Logic-->>API: Score saved with grade
+    API-->>UI: 201 Created
+    UI-->>F: Show confirmation
+                </div>
+            </div>
+        </div>
+
+        <div id="seq-dashboard" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+sequenceDiagram
+    actor U as User
+    participant UI as Dashboard Page
+    participant API as API Server
+    participant DS as Dashboard Service
+    participant DB as Database
+
+    U->>UI: Open Dashboard
+    UI->>API: GET /api/dashboard
+
+    par Parallel Queries
+        API->>DS: getPerformanceSummary()
+        DS->>DB: Query vw_student_performance
+        DB-->>DS: Exam scores and grades
+
+        API->>DS: getAttendanceRate()
+        DS->>DB: Query vw_attendance_rate
+        DB-->>DS: Attendance percentages
+
+        API->>DS: getStudyHours()
+        DS->>DB: Query Study_Log
+        DB-->>DS: Study hours per course
+
+        API->>DS: getLifestyleData()
+        DS->>DB: Query Lifestyle_Factor
+        DB-->>DS: Sleep and stress data
+    end
+
+    DS-->>API: Combined dashboard data
+    API-->>UI: 200 OK with all data
+    UI->>UI: Render charts
+    UI-->>U: Display interactive dashboard
+                </div>
+            </div>
+        </div>
+
+        <div id="seq-study" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+sequenceDiagram
+    actor S as Student
+    participant UI as Study Log Page
+    participant API as API Server
+    participant DB as Database
+
+    S->>UI: Select course, enter hours, method
+    UI->>API: POST /api/study-log
+    API->>DB: Verify enrollment
+    DB-->>API: Enrollment confirmed
+    API->>DB: INSERT INTO Study_Log
+    DB-->>API: Success
+    API-->>UI: 201 Created
+    UI-->>S: Study session logged
+    UI->>UI: Update weekly study chart
+                </div>
+            </div>
+        </div>
+
+        <div id="seq-atrisk" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+sequenceDiagram
+    actor A as Admin / Faculty
+    participant UI as At-Risk Page
+    participant API as API Server
+    participant DS as Dashboard Service
+    participant DB as Database
+
+    A->>UI: Click At-Risk Students
+    UI->>API: GET /api/at-risk
+    API->>DS: getAtRiskStudents()
+    DS->>DB: Query vw_at_risk_students
+    Note over DS,DB: attendance below 75% OR avg marks below 40%
+    DB-->>DS: At-risk student list
+    DS-->>API: Results with details
+    API-->>UI: 200 OK
+    UI-->>A: Display at-risk table
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ACTIVITY DIAGRAMS -->
+    <section class="section" id="activity">
+        <div class="section-header">
+            <div class="section-num">6</div>
+            <h2>Activity Diagrams</h2>
+        </div>
+        <p class="section-desc">Shows the workflow and step-by-step process of key operations.</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'act-reg')">📝 Student Registration</button>
+            <button class="tab-btn" onclick="switchTab(event, 'act-perf')">📊 Performance Analysis</button>
+            <button class="tab-btn" onclick="switchTab(event, 'act-attend')">✅ Attendance Marking</button>
+        </div>
+
+        <div id="act-reg" class="tab-content active">
+            <div class="diagram-box">
+                <div class="mermaid">
+flowchart TD
+    A([Start]) --> B["Admin opens Add Student form"]
+    B --> C["Enter student details: Name, DOB, Gender, Email, Phone, Dept"]
+    C --> D{"All required fields filled?"}
+    D -- No --> C
+    D -- Yes --> E{"Email already exists?"}
+    E -- Yes --> F["Show error: Email already registered"]
+    F --> C
+    E -- No --> G["Enter additional info: Parent Education, Income, City"]
+    G --> H["Create User Account with temp password"]
+    H --> I["INSERT into Student table"]
+    I --> J["INSERT into User_Account table"]
+    J --> K["Send welcome email with credentials"]
+    K --> L["Show success message"]
+    L --> M([End])
+                </div>
+            </div>
+        </div>
+
+        <div id="act-perf" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+flowchart TD
+    A([Start]) --> B["User selects filters: Dept, Semester, Course"]
+    B --> C["Fetch exam scores"]
+    C --> D["Fetch attendance data"]
+    D --> E["Fetch study log data"]
+    E --> F["Fetch lifestyle factors"]
+    F --> G["Aggregate and compute averages"]
+    G --> H{"Which analysis view?"}
+
+    H -- Score Trends --> I["Generate line chart"]
+    H -- Study vs Marks --> J["Generate scatter plot"]
+    H -- Sleep Impact --> K["Generate bar chart"]
+    H -- At-Risk List --> L["Generate filtered table"]
+
+    I --> N{"Export report?"}
+    J --> N
+    K --> N
+    L --> N
+
+    N -- Yes --> O["Generate CSV or PDF"]
+    O --> P["Download file"]
+    N -- No --> P2["View on dashboard"]
+    P --> Q([End])
+    P2 --> Q
+                </div>
+            </div>
+        </div>
+
+        <div id="act-attend" class="tab-content">
+            <div class="diagram-box">
+                <div class="mermaid">
+flowchart TD
+    A([Start]) --> B["Faculty selects Course and Session Date"]
+    B --> C["System loads enrolled student list"]
+    C --> D["Faculty marks each student: Present / Absent / Late"]
+    D --> E{"All students marked?"}
+    E -- No --> D
+    E -- Yes --> F["Faculty clicks Submit"]
+    F --> G["System validates: No duplicate entries"]
+    G --> H{"Duplicates found?"}
+    H -- Yes --> I["Show warning: Already marked"]
+    I --> J{"Overwrite?"}
+    J -- Yes --> K["UPDATE existing records"]
+    J -- No --> L["Cancel submission"]
+    H -- No --> K2["INSERT attendance records"]
+    K --> M["Show success"]
+    K2 --> M
+    L --> N([End])
+    M --> N
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATE DIAGRAMS -->
+    <section class="section" id="state">
+        <div class="section-header">
+            <div class="section-num">7</div>
+            <h2>State Diagrams</h2>
+        </div>
+        <p class="section-desc">Shows the lifecycle states and transitions of key entities in the system.</p>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>🎓 Student Enrollment Lifecycle</h3>
+                <p class="subtitle">States a student goes through from application to graduation</p>
+                <div class="diagram-box">
+                    <div class="mermaid">
+stateDiagram-v2
+    [*] --> Applied : Student applies
+
+    Applied --> Admitted : Accepted
+    Applied --> Rejected : Rejected
+
+    Rejected --> [*]
+
+    Admitted --> Enrolled : Registration done
+    Enrolled --> Active : Semester begins
+
+    Active --> OnLeave : Leave approved
+    OnLeave --> Active : Returns
+
+    Active --> AtRisk : Low attendance/marks
+    AtRisk --> Active : Improves
+    AtRisk --> Detained : No improvement
+
+    Active --> SemCompleted : Exams done
+    SemCompleted --> Active : Next semester
+    SemCompleted --> Graduated : All done
+
+    Detained --> Active : Re-admitted
+    Detained --> Dropped : Leaves
+
+    Dropped --> [*]
+    Graduated --> [*]
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📝 Exam Score Lifecycle</h3>
+                <p class="subtitle">States from exam creation to result finalization</p>
+                <div class="diagram-box">
+                    <div class="mermaid">
+stateDiagram-v2
+    [*] --> Scheduled : Exam created
+
+    Scheduled --> Conducted : Exam date
+    Conducted --> MarksEntry : Evaluated
+
+    MarksEntry --> GradeCalc : Auto-grade trigger
+    GradeCalc --> Published : Faculty approves
+
+    Published --> UnderReview : Revaluation requested
+    UnderReview --> Updated : Re-evaluation done
+    Updated --> Published : Updated grade
+
+    Published --> Finalized : Deadline passed
+    Finalized --> [*]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DATA FLOW DIAGRAMS -->
+    <section class="section" id="dfd">
+        <div class="section-header">
+            <div class="section-num">8</div>
+            <h2>Data Flow Diagrams (DFD)</h2>
+        </div>
+        <p class="section-desc">Shows how data flows between processes, data stores, and external entities at different levels of detail.</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'dfd-0')">Level 0 — Context</button>
+            <button class="tab-btn" onclick="switchTab(event, 'dfd-1')">Level 1 — Processes</button>
+            <button class="tab-btn" onclick="switchTab(event, 'dfd-2')">Level 2 — Score Detail</button>
+        </div>
+
+        <div id="dfd-0" class="tab-content active">
+            <div class="card">
+                <h3>🌐 Level 0 — Context Diagram</h3>
+                <p class="subtitle">The entire system as a single process with external entities</p>
+                <div class="diagram-box">
+                    <div class="mermaid">
+flowchart LR
+    Admin["🧑‍💼 Admin"]
+    Faculty["👩‍🏫 Faculty"]
+    StudentActor["🎓 Student"]
+
+    subgraph P0["Student Performance Dashboard"]
+        Core["System"]
+    end
+
+    Admin -->|"Student, Course, Dept data, User accounts"| Core
+    Core -->|"Reports, Alerts, Exports"| Admin
+
+    Faculty -->|"Exam scores, Attendance"| Core
+    Core -->|"Class insights, At-risk list"| Faculty
+
+    StudentActor -->|"Study hours, Lifestyle, Activities"| Core
+    Core -->|"Personal dashboard, Trends"| StudentActor
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dfd-1" class="tab-content">
+            <div class="card">
+                <h3>🔄 Level 1 — Major Processes</h3>
+                <p class="subtitle">System broken into 7 sub-processes with data stores</p>
+                <div class="diagram-box">
+                    <div class="mermaid">
+flowchart TD
+    Admin["🧑‍💼 Admin"]
+    Faculty["👩‍🏫 Faculty"]
+    StudentActor["🎓 Student"]
+
+    P1["1.0 User Management"]
+    P2["2.0 Academic Management"]
+    P3["3.0 Attendance Tracking"]
+    P4["4.0 Score Management"]
+    P5["5.0 Study and Lifestyle Tracking"]
+    P6["6.0 Analytics and Dashboard"]
+    P7["7.0 Report Generation"]
+
+    DS1[("D1: User_Account")]
+    DS2[("D2: Student")]
+    DS3[("D3: Course")]
+    DS4[("D4: Attendance")]
+    DS5[("D5: Exam_Score")]
+    DS6[("D6: Study_Log")]
+    DS7[("D7: Lifestyle_Factor")]
+
+    Admin -->|"User details"| P1
+    P1 --> DS1
+
+    Admin -->|"Student info"| P2
+    P2 --> DS2
+    P2 --> DS3
+
+    Faculty -->|"Attendance data"| P3
+    P3 --> DS4
+
+    Faculty -->|"Marks data"| P4
+    P4 --> DS5
+
+    StudentActor -->|"Study and lifestyle data"| P5
+    P5 --> DS6
+    P5 --> DS7
+
+    DS2 --> P6
+    DS4 --> P6
+    DS5 --> P6
+    DS6 --> P6
+    DS7 --> P6
+
+    P6 -->|"Dashboard data"| Faculty
+    P6 -->|"Dashboard data"| StudentActor
+
+    P6 --> P7
+    P7 -->|"Reports"| Admin
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dfd-2" class="tab-content">
+            <div class="card">
+                <h3>🔍 Level 2 — Score Management (Process 4.0)</h3>
+                <p class="subtitle">Detailed sub-steps of the score entry process</p>
+                <div class="diagram-box">
+                    <div class="mermaid">
+flowchart TD
+    Faculty["👩‍🏫 Faculty"]
+
+    P41["4.1 Select Course and Exam"]
+    P42["4.2 Fetch Enrolled Students"]
+    P43["4.3 Enter Marks"]
+    P44["4.4 Validate Marks"]
+    P45["4.5 Calculate Grade via Trigger"]
+    P46["4.6 Save Score Record"]
+
+    DS_Enrollment[("D3: Enrollment")]
+    DS_Exam[("D5a: Exam")]
+    DS_Score[("D5b: Exam_Score")]
+
+    Faculty -->|"Course ID, Exam ID"| P41
+    P41 -->|"Fetch exam details"| DS_Exam
+    DS_Exam -->|"max_marks"| P41
+    P41 --> P42
+    P42 -->|"Fetch students"| DS_Enrollment
+    DS_Enrollment -->|"Student list"| P42
+    P42 --> P43
+    Faculty -->|"Student marks"| P43
+    P43 --> P44
+    P44 -->|"Invalid"| P43
+    P44 -->|"Valid"| P45
+    P45 --> P46
+    P46 -->|"INSERT"| DS_Score
+    P46 -->|"Confirmation"| Faculty
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ER DIAGRAM -->
+    <section class="section" id="er">
+        <div class="section-header">
+            <div class="section-num">9</div>
+            <h2>Entity-Relationship (ER) Diagram</h2>
+        </div>
+        <p class="section-desc">Shows all 13 database entities with their attributes, primary/foreign keys, and relationships.</p>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+erDiagram
+    STUDENT ||--o{ ENROLLMENT : "enrolls in"
+    STUDENT ||--o{ ATTENDANCE : "has"
+    STUDENT ||--o{ EXAM_SCORE : "achieves"
+    STUDENT ||--o{ STUDY_LOG : "logs"
+    STUDENT ||--o{ LIFESTYLE_FACTOR : "records"
+    STUDENT ||--o{ EXTRACURRICULAR : "participates"
+    STUDENT }o--|| DEPARTMENT : "belongs to"
+    STUDENT ||--o| USER_ACCOUNT : "has"
+
+    COURSE ||--o{ ENROLLMENT : "includes"
+    COURSE ||--o{ EXAM_SCORE : "evaluated in"
+    COURSE ||--o{ SESSION : "has"
+    COURSE }o--|| DEPARTMENT : "offered by"
+    COURSE }o--|| FACULTY : "taught by"
+
+    FACULTY }o--|| DEPARTMENT : "works in"
+    SESSION ||--o{ ATTENDANCE : "tracked in"
+    SEMESTER ||--o{ ENROLLMENT : "spans"
+    SEMESTER ||--o{ EXAM : "holds"
+    EXAM ||--o{ EXAM_SCORE : "produces"
+
+    STUDENT {
+        int student_id PK
+        varchar first_name
+        varchar last_name
+        date date_of_birth
+        enum gender
+        varchar email
+        int dept_id FK
+        enum parent_education
+        enum family_income_bracket
+    }
+
+    DEPARTMENT {
+        int dept_id PK
+        varchar dept_name
+        varchar hod_name
+    }
+
+    FACULTY {
+        int faculty_id PK
+        varchar first_name
+        varchar last_name
+        varchar email
+        int dept_id FK
+    }
+
+    COURSE {
+        int course_id PK
+        varchar course_code
+        varchar course_name
+        int credits
+        int dept_id FK
+        int faculty_id FK
+    }
+
+    EXAM_SCORE {
+        int score_id PK
+        int student_id FK
+        int course_id FK
+        int exam_id FK
+        decimal marks_obtained
+        varchar grade
+    }
+
+    STUDY_LOG {
+        int log_id PK
+        int student_id FK
+        int course_id FK
+        date log_date
+        decimal hours_studied
+        enum study_method
+    }
+
+    LIFESTYLE_FACTOR {
+        int factor_id PK
+        int student_id FK
+        decimal sleep_hours
+        boolean has_part_time_job
+        enum stress_level
+        enum motivation_level
+    }
+
+    ATTENDANCE {
+        int attendance_id PK
+        int student_id FK
+        int session_id FK
+        enum status
+    }
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPONENT DIAGRAM -->
+    <section class="section" id="component">
+        <div class="section-header">
+            <div class="section-num">10</div>
+            <h2>Component Diagram</h2>
+        </div>
+        <p class="section-desc">Shows the software modules/components and how they depend on each other across layers.</p>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+flowchart TD
+    subgraph Presentation["Presentation Layer"]
+        C1["Login Module"]
+        C2["Dashboard UI with Charts"]
+        C3["Data Entry Forms"]
+        C4["Report Viewer and Export"]
+    end
+
+    subgraph Business["Business Logic Layer"]
+        C5["Authentication Service"]
+        C6["Student Service"]
+        C7["Course and Enrollment Service"]
+        C8["Score and Grading Service"]
+        C9["Attendance Service"]
+        C10["Study and Lifestyle Service"]
+        C11["Analytics and Dashboard Service"]
+        C12["Report Service"]
+    end
+
+    subgraph Data["Data Access Layer"]
+        C13["ORM and Query Builder"]
+        C14["Connection Pool"]
+    end
+
+    subgraph DB["Database"]
+        C15["MySQL or PostgreSQL"]
+    end
+
+    C1 --> C5
+    C2 --> C11
+    C3 --> C8
+    C3 --> C9
+    C3 --> C10
+    C4 --> C12
+
+    C5 --> C13
+    C6 --> C13
+    C7 --> C13
+    C8 --> C13
+    C9 --> C13
+    C10 --> C13
+    C11 --> C13
+    C12 --> C11
+
+    C13 --> C14
+    C14 --> C15
+            </div>
+        </div>
+    </section>
+
+    <!-- DEPLOYMENT DIAGRAM -->
+    <section class="section" id="deployment">
+        <div class="section-header">
+            <div class="section-num">11</div>
+            <h2>Deployment Diagram</h2>
+        </div>
+        <p class="section-desc">Shows where the software runs — the hardware nodes, servers, and network communication.</p>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+flowchart TD
+    subgraph Client["Client Machine - Browser"]
+        Browser["Web Browser - Chrome or Firefox"]
+        Charts["Chart.js for client-side rendering"]
+    end
+
+    subgraph WebServer["Web and App Server"]
+        App["Application Server - Node.js or Flask"]
+        API["REST API - Express or Flask-RESTful"]
+        Auth["JWT Authentication Module"]
+        Static["Static File Server - HTML CSS JS"]
+    end
+
+    subgraph DBServer["Database Server"]
+        DBMS["MySQL 8.0 or PostgreSQL 15"]
+        Views["Views and Stored Procedures"]
+        Backup["Automated Daily Backup"]
+    end
+
+    Browser -->|"HTTPS Requests"| API
+    Static -->|"Serves frontend files"| Browser
+    Charts --> Browser
+
+    API --> Auth
+    API --> App
+    App -->|"SQL Queries via Port 3306 or 5432"| DBMS
+    DBMS --> Views
+    DBMS --> Backup
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>📊 Student Performance & Study Factors Dashboard — Software Model | DBMS Project 2026</p>
+    </footer>
+
+</main>
+
+<script>
+    // Initialize Mermaid
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#3b82f6',
+            primaryTextColor: '#f1f5f9',
+            primaryBorderColor: '#475569',
+            lineColor: '#64748b',
+            secondaryColor: '#1e293b',
+            tertiaryColor: '#334155',
+            background: '#0d1525',
+            mainBkg: '#1e293b',
+            nodeBorder: '#475569',
+            clusterBkg: '#1e293b',
+            clusterBorder: '#475569',
+            titleColor: '#f1f5f9',
+            edgeLabelBackground: '#1e293b',
+            nodeTextColor: '#f1f5f9',
+        },
+        flowchart: { curve: 'basis', padding: 15 },
+        sequence: { actorMargin: 50, useMaxWidth: false },
+        er: { useMaxWidth: false },
+    });
+
+    // Tab switching
+    function switchTab(event, tabId) {
+        const parent = event.target.closest('.section');
+        parent.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        parent.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+
+        // Re-render mermaid in newly visible tab
+        const target = document.getElementById(tabId);
+        const mermaidEls = target.querySelectorAll('.mermaid');
+        mermaidEls.forEach(el => {
+            if (el.getAttribute('data-processed')) {
+                // Already rendered
+            }
+        });
+    }
+
+    // Sidebar active link on scroll
+    const sections = document.querySelectorAll('.section, .hero');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>
